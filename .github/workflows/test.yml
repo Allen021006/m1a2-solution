@@ -1,0 +1,35 @@
+name: test
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+        working-directory: ./
+      - name: Run tests
+        working-directory: ./
+        run: |
+          npm test -- --json --outputFile=test-results.json || true
+      - name: Generate summary
+        run: |
+          node -e "
+          const r = require('./test-results.json');
+          const passed = r.numPassedTests;
+          const total = r.numTotalTests;
+          let md = '## ' + (passed === total ? '✅' : '❌') + ' ' + passed + ' / ' + total + ' tests passed\n\n';
+          md += '| Result | Test |\n|--------|------|\n';
+          r.testResults.forEach(suite => {
+            const tests = suite.assertionResults || [];
+            tests.forEach(t => {
+              const icon = t.status === 'passed' ? '✅' : '❌';
+              md += '| ' + icon + ' | ' + t.fullName + ' |\n';
+            });
+          });
+          require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+          "
