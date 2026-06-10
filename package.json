@@ -1,0 +1,10 @@
+{
+  "name": "m1a2-solution",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
